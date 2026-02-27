@@ -1,0 +1,23 @@
+providers = ["node"]
+
+[phases.setup]
+nixPkgs = ["nodejs", "npm", "ffmpeg", "python3"]
+aptPkgs = ["ffmpeg", "python3", "python3-pip"]
+
+[phases.setup.nixOverlays]
+cmds = ["pip3 install faster-whisper"]
+
+[phases.build]
+dependsOn = ["setup"]
+cmds = [
+    "cd backend",
+    "npm ci",
+    "npx prisma generate",
+    "npm run build"
+]
+
+[phases.build.cacheDirectories]
+dirs = ["backend/node_modules", "backend/dist"]
+
+[start]
+cmd = "cd backend && npx prisma migrate deploy && node dist/main.js"
