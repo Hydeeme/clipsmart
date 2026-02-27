@@ -7,46 +7,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum ProjectStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
-}
-
-enum ClipStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
-}
-
-enum SourceType {
-  UPLOAD
-  YOUTUBE
-}
-
 enum Plan {
   FREE
   PRO
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  plan      Plan      @default(FREE)
-  createdAt DateTime  @default(now())
-
-  projects  Project[]   // ⬅️ INI YANG KURANG
-}
-
-model Project {
-  id        String        @id @default(uuid())
-  title     String
-  status    ProjectStatus @default(PENDING)
-  source    SourceType
-  userId    String
-  createdAt DateTime      @default(now())
-
-  user User @relation(fields: [userId], references: [id])
+  id    String @id @default(uuid())
+  email String @unique
+  plan  Plan   @default(FREE)
 }
