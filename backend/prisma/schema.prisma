@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  name          String?
+  plan          Plan      @default(FREE)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  
+  projects      Project[]
+  usageStats    UsageStat?
+  
+  @@map("users")
+}
+
+model UsageStat {
+  id                    String   @id @default(uuid())
+  userId                String   @unique @map("user_id")
+  videosProcessed       Int      @default(0) @map("videos_processed")
+  videosLimit           Int      @default(5) @map("videos_limit")
+  minutesProcessed      Int      @default(0) @map("minutes_processed")
+  minutesLimit          Int      @default(60) @map("minutes_limit")
+  currentPeriodStart    DateTime @default(now()) @map("current_period_start")
+  currentPeriodEnd      DateTime @map("current_period_end")
+  
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("usage_stats")
+}
+
+model Project {
+  id                String          @id @default(uuid())
+  userId            String          @map("user_id")
+  title             String
+  description       String?
+  status            ProjectStatus   @default(PENDING)
+  sourceUrl         String?         @map("source_url")
+  sourceType        SourceType      @map("source_type")
+  originalVideoPath String?         @map("original_video_path")
+  duration          Float?
+  thumbnailUrl      String?         @map("thumbnail_url")
+  transcript        String?
+  transcriptSrt     String?         @map("transcript_srt")
+  viralScore        Int?            @map("viral_score")
+  viralScoreBreakdown Json?         @map("viral_score_breakdown")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clips             Clip[]
+  processingJob     ProcessingJob?
+  
+  @@map("projects")
+}
+
+model Clip {
+  id                String          @id @default(uuid())
+  projectId         String          @map("project_id")
+  title             String?
+  startTime         Float           @map("start_time")
+  endTime           Float           @map("end_time")
+  duration          Float
+  videoPath         String          @map("video_path")
+  thumbnailUrl      String?         @map("thumbnail_url")
+  transcript        String?
+  hookText          String?         @map("hook_text")
+  titles            Json?
+  abTestEnabled     Boolean         @default(false) @map("ab_test_enabled")
+  hookVariantA      String?         @map("hook_variant_a")
+  hookVariantB      String?         @map("hook_variant_b")
+  abTestWinner      String?         @map("ab_test_winner")
+  viralScore        Int             @map("viral_score")
+  viralScoreBreakdown Json?         @map("viral_score_breakdown")
+  isFavorite        Boolean         @default(false) @map("is_favorite")
+  status            ClipStatus      @default(PROCESSING)
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  
+  project           Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@map("clips")
+}
+
+model ProcessingJob {
+  id            String        @id @default(uuid())
+  projectId     String        @unique @map("project_id")
+  jobType       JobType       @map("job_type")
+  status        JobStatus     @default(PENDING)
+  progress      Int           @default(0)
+  currentStep   String?       @map("current_step")
+  errorMessage  String?       @map("error_message")
+  result        Json?
+  startedAt     DateTime?     @map("started_at")
+  completedAt   DateTime?     @map("completed_at")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  
+  project       Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@map("processing_jobs")
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum ProjectStatus {
+  PENDING
+  UPLOADING
+  PROCESSING
+  ANALYZING
+  COMPLETED
+  FAILED
+}
+
+enum SourceType {
+  UPLOAD
+  YOUTUBE
+}
+
+enum ClipStatus {
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum JobType {
+  VIDEO_PROCESSING
+  TRANSCRIPTION
+  VIRAL_SCORE
+  HOOK_GENERATION
+}
+
+enum JobStatus {
+  PENDING
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
