@@ -30,3 +30,21 @@ enum Plan {
   FREE
   PRO
 }
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  plan      Plan     @default(FREE)
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id        String        @id @default(uuid())
+  title     String
+  status    ProjectStatus @default(PENDING)
+  source    SourceType
+  userId    String
+  createdAt DateTime      @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
