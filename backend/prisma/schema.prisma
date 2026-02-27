@@ -2,11 +2,31 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 generator client {
   provider = "prisma-client-js"
 }
 
-enum ProjectStatus { PENDING PROCESSING COMPLETED FAILED }
-enum ClipStatus { PENDING PROCESSING COMPLETED FAILED }
-enum SourceType { UPLOAD YOUTUBE }
-enum Plan { FREE PRO }
+enum ProjectStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ClipStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum SourceType {
+  UPLOAD
+  YOUTUBE
+}
+
+enum Plan {
+  FREE
+  PRO
+}
