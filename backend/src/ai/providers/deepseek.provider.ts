@@ -1,4 +1,4 @@
-import { AIProvider, HookGenerationResult, ABTestResult } from '../../ai.service';
+import { AIProvider, HookGenerationResult, ABTestResult } from '../ai.service';
 
 export class DeepSeekProvider implements AIProvider {
   async generateHook(text: string): Promise<HookGenerationResult> {
